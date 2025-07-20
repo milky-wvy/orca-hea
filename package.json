@@ -1,0 +1,19 @@
+{
+  "name": "solana-orca-analytics",
+  "version": "1.0.0",
+  "description": "Track volume and TVL of Orca pools on Solana",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.88.2",
+    "base-64": "^1.0.0",
+    "bs58": "^5.0.0",
+    "node-fetch": "^2.6.7"
+  },
+  "keywords": ["solana", "orca", "analytics", "dex", "tvl", "volume"],
+  "author": "you",
+  "license": "MIT"
+}
