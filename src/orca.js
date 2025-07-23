@@ -39,12 +39,10 @@ async function getAllSignatures(poolAddress) {
 }
 
 async function getTokenBalance(mint, owner) {
-  const res = await connection.getTokenAccountsByOwner(owner, { mint });
+  const res = await connection.getParsedTokenAccountsByOwner(owner, { mint });
   let total = 0;
-  for (const acc of res.value) {
-    const data = acc.account.data;
-    const decoded = JSON.parse(Buffer.from(data[0], data[1] === 'base64' ? 'base64' : 'utf8').toString());
-    const amount = parseInt(decoded?.parsed?.info?.tokenAmount?.amount || 0);
+  for (const { account } of res.value) {
+    const amount = parseInt(account.data.parsed.info.tokenAmount.amount);
     total += amount;
   }
   return total;
