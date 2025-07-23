@@ -1,5 +1,28 @@
 const { connection, POOL_ADDRESS, TOKEN_A_MINT, TOKEN_B_MINT, SWAP_PROGRAM_ID } = require("./utils");
 const base64 = require("base-64");
+const bs58 = require("bs58");
+
+function decodeSwapInstruction(data) {
+  let buffer;
+  if (typeof data === "string") {
+    try {
+      buffer = Buffer.from(data, "base64");
+    } catch (_) {
+      buffer = bs58.decode(data);
+    }
+  } else {
+    buffer = Buffer.from(data);
+  }
+
+  if (buffer.length < 17) return null;
+  const instruction = buffer.readUInt8(0);
+  if (instruction !== 1) return null;
+
+  const amountIn = Number(buffer.readBigUInt64LE(1));
+  const minAmountOut = Number(buffer.readBigUInt64LE(9));
+
+  return { amountIn, minAmountOut };
+}
 
 async function getAllSignatures(poolAddress) {
   let allSignatures = [];
@@ -42,11 +65,11 @@ async function getVolumeAndTVL() {
       if (!inst.programId.equals(SWAP_PROGRAM_ID)) continue;
 
       try {
-        const data = inst.data;
-        const decoded = base64.decode(data);
-        // TODO: нормальный разбор swap'ов
-        volumeTokenA += 1;
-        volumeTokenB += 1;
+        const amounts = decodeSwapInstruction(inst.data);
+        if (amounts) {
+          volumeTokenA += amounts.amountIn;
+          volumeTokenB += amounts.minAmountOut;
+        }
       } catch (e) {
         console.error("Error decoding instruction:", e);
       }
